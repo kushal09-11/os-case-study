@@ -77,11 +77,9 @@ def analyze_migration(req: MigrationAnalysisRequest):
             sec_ok = True
             sec_reason = "Compatible"
             
-            # Example rule: Core 3 has untrusted workload if flagged or simulation setup
-            if proc.securityLevel == "SENSITIVE" and d_core.id == 3:
-                # Core 3 simulate security isolation conflict
+            if not d_core.securityCompatible:
                 sec_ok = False
-                sec_reason = "Security isolation policy: Sensitive workload cannot share Core 3"
+                sec_reason = d_core.securityReason
             elif projected_dest_load > 90.0:
                 sec_ok = False
                 sec_reason = "Destination would become overloaded"
@@ -134,9 +132,9 @@ def analyze_migration(req: MigrationAnalysisRequest):
         sec_reason = "Compatible"
         decision = "APPROVED"
         
-        if target_proc and target_proc.securityLevel == "SENSITIVE" and d_core.id == 3:
+        if target_proc and not d_core.securityCompatible:
             sec_pass = False
-            sec_reason = "Isolation Policy: UNTRUSTED co-tenant detected on Core 3"
+            sec_reason = d_core.securityReason
             decision = "BLOCKED"
         elif projected > 88.0:
             sec_pass = False

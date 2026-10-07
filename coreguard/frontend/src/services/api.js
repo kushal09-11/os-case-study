@@ -31,6 +31,7 @@ export const api = {
         coreId: params.coreId,
         overloadPredicted: isOverload,
         confidence: Math.round(85 + Math.random() * 10),
+        overloadProbability: Math.round((isOverload ? 0.82 : 0.18) * 100),
         predictedLoad,
         riskLevel: isOverload ? 'CRITICAL' : 'NOMINAL',
         recommendation: isOverload ? 'MIGRATION_REQUIRED' : 'KEEP_AFFINITY'

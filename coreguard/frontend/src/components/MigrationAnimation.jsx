@@ -5,6 +5,7 @@ import { ArrowRight, ShieldCheck, Zap, Cpu, Sparkles } from 'lucide-react';
 
 export default function MigrationAnimation({
   activeMigration,
+  decisionPlan = null,
   containerRef
 }) {
   const [sourcePos, setSourcePos] = useState({ x: 0, y: 0 });
@@ -12,12 +13,12 @@ export default function MigrationAnimation({
   const [isCalculated, setIsCalculated] = useState(false);
 
   useEffect(() => {
-    if (!activeMigration || !containerRef.current) return;
+    if ((!activeMigration && !decisionPlan) || !containerRef.current) return;
 
     const updateCoordinates = () => {
       const containerRect = containerRef.current.getBoundingClientRect();
-      const sourceEl = document.getElementById(`core-box-${activeMigration.sourceCoreId}`);
-      const destEl = document.getElementById(`core-box-${activeMigration.destCoreId}`);
+      const sourceEl = document.getElementById(`core-box-${activeMigration?.sourceCoreId ?? decisionPlan.sourceCoreId}`);
+      const destEl = document.getElementById(`core-box-${activeMigration?.destCoreId ?? decisionPlan.destCoreId}`);
 
       if (sourceEl && destEl) {
         const sRect = sourceEl.getBoundingClientRect();
@@ -42,9 +43,18 @@ export default function MigrationAnimation({
       window.removeEventListener('resize', updateCoordinates);
       clearInterval(interval);
     };
-  }, [activeMigration, containerRef]);
+  }, [activeMigration, decisionPlan, containerRef]);
 
-  if (!activeMigration) return null;
+  if (!activeMigration && !decisionPlan) return null;
+
+  const displayMigration = activeMigration || {
+    migratingProcess: decisionPlan.process,
+    sourceCoreId: decisionPlan.sourceCoreId,
+    destCoreId: decisionPlan.destCoreId,
+    progress: 0,
+    elapsed: 0,
+    duration: decisionPlan.evaluation?.migrationTime || 1
+  };
 
   const {
     migratingProcess,
@@ -56,7 +66,8 @@ export default function MigrationAnimation({
     score = 17.5,
     elapsed = 0,
     duration = 1.0
-  } = activeMigration;
+  } = displayMigration;
+  const isDecisionPreview = !activeMigration;
 
   const progressPercent = Math.min(100, Math.max(0, Math.round(progress * 100)));
 
@@ -136,7 +147,7 @@ export default function MigrationAnimation({
       )}
 
       {/* Floating Animated Process Card moving along vector */}
-      {isCalculated && (
+      {isCalculated && !isDecisionPreview && (
         <div
           className="absolute z-30 pointer-events-none transition-transform"
           style={{
@@ -166,7 +177,7 @@ export default function MigrationAnimation({
       )}
 
       {/* Migration Progress Telemetry Banner */}
-      <motion.div
+      {activeMigration && <motion.div
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
@@ -232,7 +243,7 @@ export default function MigrationAnimation({
             />
           </div>
         </div>
-      </motion.div>
+      </motion.div>}
     </>
   );
 }

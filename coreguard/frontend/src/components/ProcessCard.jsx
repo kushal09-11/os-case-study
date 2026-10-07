@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Cpu, HardDrive, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
 
-export default function ProcessCard({ process, isCompact = false, isMigrating = false }) {
+export default function ProcessCard({ process, isCompact = false, isMigrating = false, isCandidate = false }) {
   if (!process) return null;
 
   const securityColors = {
@@ -30,6 +30,8 @@ export default function ProcessCard({ process, isCompact = false, isMigrating = 
       className={`rounded-lg border transition-all text-xs select-none shadow-md ${
         isMigrating
           ? 'bg-cyan-950/90 border-cyan-400 text-cyan-200 shadow-cyan-500/30 ring-2 ring-cyan-400/50'
+          : isCandidate
+          ? 'bg-amber-950/90 border-amber-300 text-amber-100 shadow-amber-500/40 ring-2 ring-amber-400 animate-pulse'
           : securityColors[process.securityLevel] || 'bg-slate-900 border-slate-700 text-slate-200'
       } ${isCompact ? 'p-1.5' : 'p-2.5'}`}
     >

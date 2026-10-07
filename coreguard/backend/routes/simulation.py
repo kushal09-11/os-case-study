@@ -20,9 +20,9 @@ DEMO_SCENARIO_CONFIG = {
         {"time": 14.0, "type": "CANDIDATE_EVALUATION", "coreId": 1, "description": "Evaluate migration candidates on Core 1: P2, P4, P5"},
         {"time": 15.0, "type": "COST_CALCULATION", "description": "Compute multi-attribute migration cost vector for each candidate"},
         {"time": 16.0, "type": "SECURITY_CHECK", "description": "Validate target core security isolation policies (Core 3 has UNTRUSTED P6 -> blocked)"},
-        {"time": 17.0, "type": "SELECT_MIGRATION", "processId": "P5", "sourceCore": 1, "destCore": 2, "description": "P5 selected for migration (Score: +17.5, Destination: Core 2)"},
-        {"time": 18.0, "type": "START_ANIMATION", "processId": "P5", "sourceCore": 1, "destCore": 2, "duration": 2.0},
-        {"time": 20.0, "type": "COMPLETE_MIGRATION", "processId": "P5", "sourceCore": 1, "destCore": 2, "description": "P5 transferred to Core 2. Loads rebalanced."},
+        {"time": 17.0, "type": "SELECT_MIGRATION", "processId": "P5", "sourceCore": 1, "description": "P5 selected after candidate and destination scores are calculated dynamically"},
+        {"time": 18.0, "type": "START_ANIMATION", "processId": "P5", "duration": 2.0, "description": "Animated migration starts after the decision window"},
+        {"time": 20.0, "type": "COMPLETE_MIGRATION", "processId": "P5", "sourceCore": 1, "description": "P5 transferred to the highest-scoring valid destination. Loads rebalanced."},
         {"time": 21.0, "type": "SHOW_PERFORMANCE", "description": "Display comparative performance telemetry vs Reactive baseline"}
     ]
 }

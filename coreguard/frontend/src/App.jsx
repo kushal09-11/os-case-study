@@ -4,12 +4,13 @@ import SimulationPage from './pages/Simulation';
 import MigrationAnalysisPage from './pages/MigrationAnalysis';
 import PerformancePage from './pages/Performance';
 import DashboardPage from './pages/Dashboard';
+import HistoryPage from './pages/History';
 import { SimulationEngine } from './simulation/simulationEngine';
 import { api } from './services/api';
-import { Cpu, Network, Activity, Database } from 'lucide-react';
+import { Cpu, Network, Activity, LayoutDashboard, History } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('simulation');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [backendHealth, setBackendHealth] = useState('checking');
 
   // Simulation engine state
@@ -65,6 +66,11 @@ export default function App() {
   };
   const handleSpeedChange = (speed) => engineRef.current?.setSpeed(speed);
   const handleNumCoresChange = (cores) => engineRef.current?.setNumCores(cores);
+  const handleModeChange = (mode) => engineRef.current?.setMode(mode);
+  const handleAutomaticWorkload = (enabled) => engineRef.current?.setAutomaticWorkload(enabled);
+  const handleDecisionDelay = (delay) => engineRef.current?.setDecisionDelay(delay);
+  const handleSkipDecision = () => engineRef.current?.skipDecisionDelay();
+  const handleSeedChange = (seed) => engineRef.current?.setSeed(seed);
   const handleWeightChange = (newWeights) => {
     engineRef.current?.setWeights(newWeights);
     setEngineState(prev => ({
@@ -75,33 +81,22 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-black">
-      {/* Simulation Controls Top Banner */}
       <header className="sticky top-0 z-40 bg-[#080c14]/90 backdrop-blur-md border-b border-slate-800/80 p-3 sm:px-6">
-        <SimulationControls
-          simTime={engineState.simTime}
-          status={engineState.status}
-          speed={engineState.speed}
-          numCores={engineState.numCores}
-          explanationText={engineState.explanationText}
-          onStart={handleStart}
-          onPause={handlePause}
-          onResume={handleResume}
-          onStep={handleStep}
-          onReset={handleReset}
-          onGenerateLoad={handleGenerateLoad}
-          onRunDemo={handleRunDemo}
-          onSpeedChange={handleSpeedChange}
-          onNumCoresChange={handleNumCoresChange}
-          backendHealth={backendHealth}
-        />
-
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-black font-mono">CG</div>
+            <div><div className="font-extrabold tracking-wider text-white font-mono">COREGUARD</div><div className="text-[10px] text-slate-400">Predictive multicore process migration</div></div>
+          </div>
+          <div className="text-[10px] font-mono text-slate-500">{backendHealth === 'online' ? 'API ONLINE' : 'LOCAL SIMULATION'}</div>
+        </div>
         {/* Navigation Tabs */}
-        <div className="flex gap-2 mt-2 pt-2 border-t border-slate-800/60 overflow-x-auto">
+        <div className="max-w-7xl mx-auto flex gap-2 mt-3 pt-3 border-t border-slate-800/60 overflow-x-auto">
           {[
-            { id: 'simulation', label: 'Main Simulation', icon: Cpu },
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+            { id: 'simulation', label: 'Simulation Workspace', icon: Cpu },
             { id: 'analysis', label: 'Migration Analysis', icon: Network },
-            { id: 'performance', label: 'Performance & Benchmarks', icon: Activity },
-            { id: 'dashboard', label: 'System Overview & DB', icon: Database }
+            { id: 'performance', label: 'Performance', icon: Activity },
+            { id: 'history', label: 'History', icon: History }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -126,10 +121,42 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 p-3 sm:p-6 max-w-7xl mx-auto w-full">
         {activeTab === 'simulation' && (
+          <SimulationControls
+            simTime={engineState.simTime}
+            status={engineState.status}
+            speed={engineState.speed}
+            numCores={engineState.numCores}
+            explanationText={engineState.explanationText}
+            mode={engineState.mode}
+            automaticWorkload={engineState.automaticWorkload}
+            decisionDelay={engineState.decisionDelay}
+            decisionRemaining={engineState.decisionRemaining}
+            decisionPaused={engineState.decisionPaused}
+            onStart={handleStart}
+            onPause={handlePause}
+            onResume={handleResume}
+            onStep={handleStep}
+            onReset={handleReset}
+            onGenerateLoad={handleGenerateLoad}
+            onRunDemo={handleRunDemo}
+            onSpeedChange={handleSpeedChange}
+            onNumCoresChange={handleNumCoresChange}
+            onModeChange={handleModeChange}
+            onAutomaticWorkload={handleAutomaticWorkload}
+            onDecisionDelay={handleDecisionDelay}
+            onSkipDecision={handleSkipDecision}
+            onSeedChange={handleSeedChange}
+            backendHealth={backendHealth}
+          />
+        )}
+        {activeTab === 'simulation' && (
           <SimulationPage
             engineState={engineState}
             onGenerateLoad={handleGenerateLoad}
             onWeightChange={handleWeightChange}
+            onPause={handlePause}
+            onResume={handleResume}
+            onSkipDecision={handleSkipDecision}
           />
         )}
 
@@ -151,6 +178,7 @@ export default function App() {
             engineState={engineState}
           />
         )}
+        {activeTab === 'history' && <HistoryPage engineState={engineState} />}
       </main>
 
       {/* Footer */}

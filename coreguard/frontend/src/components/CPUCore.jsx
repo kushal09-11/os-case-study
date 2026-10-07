@@ -6,6 +6,7 @@ export default function CPUCore({
   core,
   processes = [],
   activeMigration = null,
+  migrationAnalysis = null,
   onCoreSelect = null
 }) {
   const [showBreakdown, setShowBreakdown] = useState(false);
@@ -16,8 +17,11 @@ export default function CPUCore({
     (p.state === 'RUNNING' || p.state === 'MIGRATION_PENDING')
   );
 
-  const isSource = activeMigration?.sourceCoreId === core.id;
-  const isDest = activeMigration?.destCoreId === core.id;
+  const plannedSource = migrationAnalysis?.bestPlan?.sourceCoreId;
+  const plannedDest = migrationAnalysis?.bestPlan?.destCoreId;
+  const isSource = activeMigration?.sourceCoreId === core.id || (!activeMigration && plannedSource === core.id);
+  const isDest = activeMigration?.destCoreId === core.id || (!activeMigration && plannedDest === core.id);
+  const selectedProcessId = migrationAnalysis?.bestPlan?.process?.id;
   const isOverloaded = core.load >= 88;
   const isWarning = core.load >= 75 && !isOverloaded;
 
@@ -178,6 +182,7 @@ export default function CPUCore({
               key={proc.id}
               process={proc}
               isMigrating={activeMigration?.migratingProcess?.id === proc.id}
+              isCandidate={!activeMigration && selectedProcessId === proc.id}
             />
           ))
         )}

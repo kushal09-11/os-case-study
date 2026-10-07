@@ -21,6 +21,8 @@ class CoreModel(BaseModel):
     status: str = "NORMAL"  # NORMAL, WARNING, OVERLOADED, MIGRATING, AVAILABLE
     processIds: List[str] = Field(default_factory=list)
     predictedLoad: Optional[float] = None
+    securityCompatible: bool = True
+    securityReason: str = "Core policy permits compatible workloads"
 
 class PredictionRequest(BaseModel):
     coreId: int
@@ -35,6 +37,7 @@ class PredictionResponse(BaseModel):
     coreId: int
     overloadPredicted: bool
     confidence: float
+    overloadProbability: float = 0.0
     predictedLoad: float
     riskLevel: str
     recommendation: str

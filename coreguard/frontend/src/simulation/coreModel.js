@@ -18,7 +18,6 @@ export function createCore(id) {
 }
 
 export function calculateCoreLoad(coreId, processes, activeMigration = null) {
-  // Sum CPU demand of running or migration_pending processes currently on this core
   const runningProcs = processes.filter(
     p => p.currentCore === coreId &&
     (p.state === 'RUNNING' || p.state === 'MIGRATION_PENDING')
@@ -26,17 +25,16 @@ export function calculateCoreLoad(coreId, processes, activeMigration = null) {
 
   let rawLoad = runningProcs.reduce((acc, p) => acc + p.cpuDemand, 0);
 
-  // If there's an active migration interpolating load
-  if (activeMigration && activeMigration.migratingProcess) {
-    const migProc = activeMigration.migratingProcess;
-    const progress = activeMigration.progress || 0; // 0.0 to 1.0
-
+  // The migrating process stays attached to its source until completion. Its
+  // visible load is interpolated between source and destination, so the UI and
+  // the model describe the same physical transfer.
+  if (activeMigration?.migratingProcess) {
+    const process = activeMigration.migratingProcess;
+    const progress = activeMigration.progress || 0;
     if (activeMigration.sourceCoreId === coreId) {
-      // Source core smoothly relinquishes CPU demand
-      rawLoad = Math.max(0, rawLoad - (migProc.cpuDemand * progress));
+      rawLoad = Math.max(0, rawLoad + process.cpuDemand * (1 - progress));
     } else if (activeMigration.destCoreId === coreId) {
-      // Destination core gradually absorbs CPU demand
-      rawLoad = Math.min(100, rawLoad + (migProc.cpuDemand * progress));
+      rawLoad = Math.min(100, rawLoad + process.cpuDemand * progress);
     }
   }
 

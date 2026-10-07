@@ -6,11 +6,15 @@ import MLPanel from '../components/MLPanel';
 import EventLog from '../components/EventLog';
 import MigrationAnalysis from '../components/MigrationAnalysis';
 import SecurityPanel from '../components/SecurityPanel';
+import DecisionWindow from '../components/DecisionWindow';
 
 export default function SimulationPage({
   engineState,
   onGenerateLoad,
-  onWeightChange
+  onWeightChange,
+  onPause,
+  onResume,
+  onSkipDecision
 }) {
   const containerRef = useRef(null);
   const {
@@ -52,6 +56,7 @@ export default function SimulationPage({
               core={core}
               processes={processes}
               activeMigration={activeMigration}
+              migrationAnalysis={(engineState.status === 'DECISION_WINDOW' || (engineState.status === 'PAUSED' && engineState.decisionRemaining > 0)) ? migrationAnalysis : null}
             />
           ))}
         </div>
@@ -59,9 +64,21 @@ export default function SimulationPage({
         {/* Dynamic Process Migration Animation & SVG Path */}
         <MigrationAnimation
           activeMigration={activeMigration}
+          decisionPlan={engineState.status === 'DECISION_WINDOW' || (engineState.status === 'PAUSED' && engineState.decisionRemaining > 0) ? migrationAnalysis?.bestPlan : null}
           containerRef={containerRef}
         />
       </div>
+
+      {(engineState.status === 'DECISION_WINDOW' || (engineState.status === 'PAUSED' && engineState.decisionRemaining > 0)) && (
+        <DecisionWindow
+          analysis={migrationAnalysis}
+          remaining={engineState.decisionRemaining}
+          paused={engineState.status === 'PAUSED'}
+          onPause={onPause}
+          onResume={onResume}
+          onSkip={onSkipDecision}
+        />
+      )}
 
       {/* Real-time Telemetry & Intelligence Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

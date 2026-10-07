@@ -62,6 +62,7 @@ def predict_core_overload(
         "coreId": core_id,
         "overloadPredicted": is_overload or (predicted_load >= 88.0),
         "confidence": confidence,
+        "overloadProbability": round(prob_overload * 100.0, 1),
         "predictedLoad": predicted_load,
         "riskLevel": risk_level,
         "recommendation": recommendation
