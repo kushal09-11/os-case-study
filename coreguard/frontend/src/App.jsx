@@ -10,7 +10,7 @@ import { api } from './services/api';
 import { Cpu, Network, Activity, LayoutDashboard, History } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('simulation');
   const [backendHealth, setBackendHealth] = useState('checking');
 
   // Simulation engine state
